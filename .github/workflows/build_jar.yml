@@ -8,19 +8,44 @@ concurrency:
 
 jobs:
   build_jni:
-    name: jni on ${{ matrix.os }}
+    name: jni on ${{ matrix.os }} ${{ matrix.arch }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        include:
-          - os: ubuntu-latest
-            outdir: linux_64
+        arch:
+          - aarch64
+          - x86_64
+        exclude:
           - os: windows-latest
-            outdir: windows_64
+          - arch: arm64
+        include:
+          - os: windows-latest
+            arch: x86_64
+            outdir: windows_x86_64
+            target: x86_64-pc-windows-gnu
+
           - os: macos-latest
-            outdir: osx_64
+            arch: aarch64
+            outdir: osx_aarm64
+            target: aarch64-apple-darwin
+
+          - os: macos-latest
+            arch: x86_64
+            outdir: osx_x86_64
+            target: x86_64-apple-darwin
+
+          - os: ubuntu-latest
+            arch: aarch64
+            outdir: linux_aarm64
+            target: aarch64-unknown-linux-gnu
+
+          - os: ubuntu-latest
+            arch: x86_64
+            outdir: linux_x86_64
+            target: x86_64-unknown-linux-gnu
+
     steps:
       - uses: actions/checkout@v3
 
@@ -48,7 +73,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest]
     needs: [build_jni]
 
     steps:
